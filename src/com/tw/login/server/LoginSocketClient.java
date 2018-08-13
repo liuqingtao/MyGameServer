@@ -2,8 +2,8 @@ package com.tw.login.server;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggerFactory;
+import com.tw.login.tools.PackDecoder;
+import com.tw.login.tools.PackEncoder;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -13,10 +13,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
-import io.netty.handler.codec.Delimiters;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 
 public class LoginSocketClient {
 	private static final Log logger=LogFactory.getLog(LoginSocketClient.class);
@@ -39,9 +37,11 @@ public class LoginSocketClient {
 				 *这个地方必须和服务器对应上，否则无法正常解码和编码 
 				 * */
 				 
-				pipeline.addLast("framer",new DelimiterBasedFrameDecoder(8192,Delimiters.lineDelimiter()));
-				pipeline.addLast("decoder",new StringDecoder());
-				pipeline.addLast("encoder",new StringEncoder());
+				pipeline.addLast("frameDecoder",new ProtobufVarint32FrameDecoder());
+				pipeline.addLast("protobufDecoder",new PackDecoder());
+				pipeline.addLast("frameEncoder",new ProtobufVarint32LengthFieldPrepender());
+				pipeline.addLast("protobufEncoder",new PackEncoder());
+				pipeline.addLast(new SocketServerHandler());
 				pipeline.addLast(new SocketClientHandler());
 			}
 			

@@ -3,6 +3,9 @@ package com.tw.login.server;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.tw.login.tools.PackDecoder;
+import com.tw.login.tools.PackEncoder;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -10,10 +13,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
-import io.netty.handler.codec.Delimiters;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
+import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 
 
 
@@ -40,10 +41,11 @@ public class LoginSocketServer {
 			protected void initChannel(SocketChannel ch) throws Exception {
 				// TODO Auto-generated method stub
 				ChannelPipeline pipeline=ch.pipeline();
-				//以("\n")为结尾分割的解码器
-				pipeline.addLast("framer",new DelimiterBasedFrameDecoder(8192,Delimiters.lineDelimiter()));
-				pipeline.addLast("decoder",new StringDecoder());
-				pipeline.addLast("encoder",new StringEncoder());
+				//使用protocbuf进行编码
+				pipeline.addLast("frameDecoder",new ProtobufVarint32FrameDecoder());
+				pipeline.addLast("protobufDecoder",new PackDecoder());
+				pipeline.addLast("frameEncoder",new ProtobufVarint32LengthFieldPrepender());
+				pipeline.addLast("protobufEncoder",new PackEncoder());
 				pipeline.addLast(new SocketServerHandler());
 			}
 			
