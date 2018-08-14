@@ -18,7 +18,7 @@ import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 
 public class LoginSocketClient {
 	private static final Log logger=LogFactory.getLog(LoginSocketClient.class);
-	private static final String IP="127.0.0.1";
+	private static final String IP="192.168.31.90";
 	private static final int PORT=8088;
 	
 	private static final EventLoopGroup group=new NioEventLoopGroup();
